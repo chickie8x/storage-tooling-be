@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id       Int   @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessionTransport SessionTransport[]
+  transportCode TransportCode[]
+}
+
+model SessionTransport {
+  id Int @id @default(autoincrement())
+  sessionCode String
+  sessionType String
+  transportCodeQuantity Int
+  transporter String
+  goodsStatus String
+  author String
+  note String
+  user User @relation(fields: [userId], references: [id])
+  userId Int 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+  transportCode TransportCode[]
+}
+
+model TransportCode {
+  id Int @id @default(autoincrement())
+  code String
+  transporter String
+  goodsStatus String
+  sessionTransport SessionTransport @relation(fields: [sessionTransportId], references: [id])
+  sessionTransportId Int
+  author String
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionTransportId, code])
+}
+
+
