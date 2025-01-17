@@ -18,6 +18,10 @@ export function verifyToken(token) {
 
 //auth middleware
 export const authMiddleware = (req, res, next) => {
+  console.log(req.headers);
+  if(!req.headers.authorization) {
+    return res.status(401).json({ message: 'Không có quyền truy cập' });
+  }
   const token = req.headers.authorization.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'Token không tồn tại' });

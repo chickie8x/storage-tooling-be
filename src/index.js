@@ -10,20 +10,16 @@ app.use(express.json());
 app.use(express.urlencoded())
 app.use(cors());
 
-app.get('/', async (req, res) => {
-  const users = await prisma.user.findMany();
-  const ret = users.map((user) => {
-    return {email: user.email, name: user.name, id: user.id};
-  });
-  res.json(ret);  
-});
+// app.get('/', async (req, res) => {
+//   res.json({message: 'Hello World'});  
+// });
 
-app.get('/users/:id', async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: { id: parseInt(req.params.id) },
-  });
-  res.json(user);
-});
+// app.get('/users/:id', async (req, res) => {
+//   const user = await prisma.user.findUnique({
+//     where: { id: parseInt(req.params.id) },
+//   });
+//   res.json(user);
+// });
 
 
 //create user
