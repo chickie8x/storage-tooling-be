@@ -23,7 +23,7 @@ app.use(cors());
 
 
 //create user
-app.post('/users/create', async (req, res) => {
+app.post('/api/users/create', async (req, res) => {
   const { name, email, password } = req.body;
   const foundUser = await prisma.user.findUnique({
     where: { email },
@@ -44,7 +44,7 @@ app.post('/users/create', async (req, res) => {
 });
 
 //login
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   
   if (!email || !password) {
@@ -66,7 +66,7 @@ app.post('/login', async (req, res) => {
 
 
 //create sessionTransport and transportCodes
-app.post('/session-transport/create', authMiddleware, async (req, res) => {
+app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
   try {
     // Extract and verify token
     const token = req.headers.authorization.split(' ')[1];
@@ -120,7 +120,7 @@ app.post('/session-transport/create', authMiddleware, async (req, res) => {
 });
 
 //get sessionTransport list
-app.get('/session-transport', authMiddleware, async (req, res) => {
+app.get('/api/session-transport', authMiddleware, async (req, res) => {
   const currentPage = parseInt(req.query.page) || 1;
   const pageSize = parseInt(req.query.limit) || 10;
   const skip = (currentPage - 1) * pageSize;
@@ -136,7 +136,7 @@ app.get('/session-transport', authMiddleware, async (req, res) => {
 });
 
 //get sessionTransport by id
-app.get('/session-transport/:id', authMiddleware, async (req, res) => {
+app.get('/api/session-transport/:id', authMiddleware, async (req, res) => {
   const sessionTransport = await prisma.transportCode.findMany({
     where: { sessionTransportId: parseInt(req.params.id) },
   });
@@ -147,7 +147,7 @@ app.get('/session-transport/:id', authMiddleware, async (req, res) => {
 });
 
 //export excel
-app.post('/export', authMiddleware, async (req, res) => {
+app.post('/api/export', authMiddleware, async (req, res) => {
   try {
     const ids = req.body.ids
     if (!ids) {
