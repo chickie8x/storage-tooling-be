@@ -158,7 +158,14 @@ app.post('/api/export', authMiddleware, async (req, res) => {
   }
 });
 
-
+//tracking transport
+app.get('/api/tracking-transport/:code', async (req, res) => {
+  const { code } = req.params;
+  const transport = await prisma.transportCode.findMany({
+    where: { code: code },
+  });
+  res.json(transport);
+});
 
 
 
