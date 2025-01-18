@@ -89,8 +89,8 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
         transportCode: {
           create: transportCode.map((code) => ({
             code: code.code,
-            transporter: code.transporter,
-            goodsStatus: code.goodsStatus,
+            transporter: transporter,
+            goodsStatus: goodsStatus,
             author: user.name,
             user: { connect: { id: user.id } },
           })),
