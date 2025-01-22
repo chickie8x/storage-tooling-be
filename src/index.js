@@ -91,6 +91,7 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
             code: code.code,
             transporter: transporter,
             goodsStatus: goodsStatus,
+            note: note,
             author: user.name,
             user: { connect: { id: user.id } },
           })),
