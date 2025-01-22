@@ -38,6 +38,7 @@ model TransportCode {
   code String
   transporter String
   goodsStatus String
+  note String
   sessionTransport SessionTransport @relation(fields: [sessionTransportId], references: [id])
   sessionTransportId Int
   author String
