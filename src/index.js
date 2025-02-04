@@ -181,11 +181,11 @@ app.post('/api/tracking-transport', async (req, res) => {
 
 //update transportCode
 app.post('/api/transport-code/update', authMiddleware, async (req, res) => {
-  const  {transportCode} = req.body;
+  const  {transportCode, goodsStatus} = req.body;
   const ids = transportCode.map((item) => item.code);
   const updateTransportCode = await prisma.transportCode.updateMany({
     where: { code: { in: ids } },
-    data: { isDone: 'Đã xuất kho' },
+    data: { isDone: goodsStatus },
   });
   console.log(updateTransportCode)
   res.json(updateTransportCode);
