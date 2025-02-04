@@ -163,12 +163,19 @@ app.post('/api/export', authMiddleware, async (req, res) => {
 });
 
 //tracking transport
-app.get('/api/tracking-transport/:code', async (req, res) => {
-  const { code } = req.params;
-  const transport = await prisma.transportCode.findMany({
-    where: { code: code },
-  });
-  res.json(transport);
+app.post('/api/tracking-transport', async (req, res) => {
+  const { codes } = req.body;
+  try {
+    const transport = await prisma.transportCode.findMany({
+      where: { code: { in: codes }   },
+    });
+    res.json(transport);
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ error: 'Có lỗi xảy ra khi tìm kiếm vận đơn' });
+  } finally {
+    await prisma.$disconnect();
+  }
 });
 
 
