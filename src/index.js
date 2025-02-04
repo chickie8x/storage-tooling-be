@@ -178,7 +178,7 @@ app.post('/api/transport-code/update', authMiddleware, async (req, res) => {
   const ids = transportCode.map((item) => item.code);
   const updateTransportCode = await prisma.transportCode.updateMany({
     where: { code: { in: ids } },
-    data: { isDone: true },
+    data: { isDone: 'Đã xuất kho' },
   });
   console.log(updateTransportCode)
   res.json(updateTransportCode);

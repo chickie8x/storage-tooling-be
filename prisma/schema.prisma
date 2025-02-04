@@ -39,7 +39,7 @@ model TransportCode {
   transporter String
   goodsStatus String
   note String @default("")
-  isDone Boolean @default(false)
+  isDone String @default("")
   sessionTransport SessionTransport @relation(fields: [sessionTransportId], references: [id])
   sessionTransportId Int
   author String
