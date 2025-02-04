@@ -67,7 +67,7 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'User not found' });
     }
 
     const { sessionCode, note, transportCode, transportCodeQuantity, transporter, goodsStatus, sessionType } = req.body;
@@ -76,7 +76,7 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
     if (!sessionCode || !transportCode) {
       return res.status(400).json({ error: 'Session code and transport codes are required' });
     }
-
+    
     const sessionTransport = await prisma.sessionTransport.create({
       data: {
         sessionCode,
@@ -86,18 +86,21 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
         goodsStatus,
         note,
         author: user.name,
-        transportCode: {
-          create: transportCode.map((code) => ({
-            code: code.code,
-            transporter: transporter,
-            goodsStatus: goodsStatus,
-            note: note,
-            author: user.name,
-            user: { connect: { id: user.id } },
-          })),
-        },
         user: { connect: { id: user.id } },
       },
+    });
+
+    const codes = await prisma.transportCode.createMany({
+      data: transportCode.map((code) => ({
+        code: code.code,
+        transporter: transporter,
+        goodsStatus: goodsStatus,
+        note: note,
+        author: user.name,
+        userId: user.id,
+        sessionTransportId: sessionTransport.id,
+      })),
+      skipDuplicates: true,
     });
 
     return res.json(sessionTransport);
@@ -131,7 +134,7 @@ app.get('/api/session-transport/:id', authMiddleware, async (req, res) => {
     where: { sessionTransportId: parseInt(req.params.id) },
   });
   if (!sessionTransport) {
-    return res.status(404).json({ error: 'Session transport not found' });
+    return res.status(404).json({ error: 'Không tìm thấy phiên' });
   }
   res.json(sessionTransport);
 });
@@ -141,7 +144,7 @@ app.post('/api/export', authMiddleware, async (req, res) => {
   try {
     const ids = req.body.ids
     if (!ids) {
-      return res.status(400).json({ error: 'No IDs provided' });
+      return res.status(400).json({ error: 'Không có mã vận đơn nào được chọn' });
     }
     const data = await prisma.transportCode.findMany({
     where: {
@@ -153,7 +156,7 @@ app.post('/api/export', authMiddleware, async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error(error.message);
-    return res.status(500).json({ error: 'An error occurred while exporting the data' });
+    return res.status(500).json({ error: 'Có lỗi xảy ra khi xuất dữ liệu' });
   } finally {
     await prisma.$disconnect();
   }
@@ -169,7 +172,17 @@ app.get('/api/tracking-transport/:code', async (req, res) => {
 });
 
 
-
+//update transportCode
+app.post('/api/transport-code/update', authMiddleware, async (req, res) => {
+  const  {transportCode} = req.body;
+  const ids = transportCode.map((item) => item.code);
+  const updateTransportCode = await prisma.transportCode.updateMany({
+    where: { code: { in: ids } },
+    data: { isDone: true },
+  });
+  console.log(updateTransportCode)
+  res.json(updateTransportCode);
+});
 
 
 app.listen(3000, () => {
