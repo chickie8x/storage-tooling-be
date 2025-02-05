@@ -166,8 +166,8 @@ app.post('/api/tracking-transport', async (req, res) => {
     const transport = await prisma.transportCode.findMany({
       where: { code: { in: codes }   },
       orderBy: [
-        { createdAt: "desc" },
         { code: "asc" },
+        { createdAt: "desc" },
       ],
     });
     res.json(transport);
