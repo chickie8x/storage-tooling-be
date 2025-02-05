@@ -85,22 +85,19 @@ app.post('/api/session-transport/create', authMiddleware, async (req, res) => {
         transporter,
         goodsStatus,
         note,
+        transportCode: {
+          create: transportCode.map((code) => ({
+            code: code.code,
+            transporter: transporter,
+            goodsStatus: goodsStatus,
+            note: note,
+            author: user.name,
+            userId: user.id,
+          })),
+        },
         author: user.name,
         user: { connect: { id: user.id } },
       },
-    });
-
-    const codes = await prisma.transportCode.createMany({
-      data: transportCode.map((code) => ({
-        code: code.code,
-        transporter: transporter,
-        goodsStatus: goodsStatus,
-        note: note,
-        author: user.name,
-        userId: user.id,
-        sessionTransportId: sessionTransport.id,
-      })),
-      skipDuplicates: true,
     });
 
     return res.json(sessionTransport);
@@ -168,6 +165,10 @@ app.post('/api/tracking-transport', async (req, res) => {
   try {
     const transport = await prisma.transportCode.findMany({
       where: { code: { in: codes }   },
+      orderBy: {
+        createdAt: 'desc',
+        code: 'asc',
+      },
     });
     res.json(transport);
   } catch (error) {
@@ -176,19 +177,6 @@ app.post('/api/tracking-transport', async (req, res) => {
   } finally {
     await prisma.$disconnect();
   }
-});
-
-
-//update transportCode
-app.post('/api/transport-code/update', authMiddleware, async (req, res) => {
-  const  {transportCode, goodsStatus} = req.body;
-  const ids = transportCode.map((item) => item.code);
-  const updateTransportCode = await prisma.transportCode.updateMany({
-    where: { code: { in: ids } },
-    data: { isDone: goodsStatus },
-  });
-  console.log(updateTransportCode)
-  res.json(updateTransportCode);
 });
 
 

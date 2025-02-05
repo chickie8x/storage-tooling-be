@@ -35,11 +35,10 @@ model SessionTransport {
 
 model TransportCode {
   id Int @id @default(autoincrement())
-  code String @unique
+  code String
   transporter String
   goodsStatus String
   note String @default("")
-  isDone String @default("")
   sessionTransport SessionTransport @relation(fields: [sessionTransportId], references: [id])
   sessionTransportId Int
   author String
