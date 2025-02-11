@@ -162,6 +162,11 @@ app.post('/api/export', authMiddleware, async (req, res) => {
 //tracking transport
 app.post('/api/tracking-transport', async (req, res) => {
   const { codes } = req.body;
+
+  if(!Array.isArray(codes) || codes.length === 0) {
+    return res.status(400).json({ error: 'Mã vận đơn không hợp lệ' });
+  }
+
   try {
     const transport = await prisma.transportCode.findMany({
       where: { code: { in: codes }   },
@@ -170,7 +175,18 @@ app.post('/api/tracking-transport', async (req, res) => {
         { createdAt: "desc" },
       ],
     });
-    res.json(transport);
+    
+    const totalCodes = codes.length;
+    const foundCodes = transport.map(item => item.code);
+    const notFoundCodes = codes.filter(code => !foundCodes.includes(code));
+
+    res.json({
+      totalCodes,
+      totalFoundCodes: foundCodes.length,
+      totalNotFoundCodes: notFoundCodes.length,
+      notFoundCodes,
+      transport,
+    });
   } catch (error) {
     console.error(error.message);
     return res.status(500).json({ error: 'Có lỗi xảy ra khi tìm kiếm vận đơn' });
