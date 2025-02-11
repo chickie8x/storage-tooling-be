@@ -182,7 +182,7 @@ app.post('/api/tracking-transport', async (req, res) => {
 
     res.json({
       totalCodes,
-      totalFoundCodes: foundCodes.length,
+      totalFoundCodes: totalCodes - notFoundCodes.length,
       totalNotFoundCodes: notFoundCodes.length,
       notFoundCodes,
       transport,
