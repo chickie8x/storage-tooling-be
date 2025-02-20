@@ -2,7 +2,7 @@ import express from 'express';
 import argon2 from 'argon2';
 import prisma from './configs/index.js';
 import cors from 'cors';
-const { exec } = require("child_process");
+import { exec } from 'child_process';
 import { generateToken, verifyToken, authMiddleware } from './utils/index.js';
 
 
