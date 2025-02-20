@@ -195,6 +195,21 @@ app.post('/api/tracking-transport', async (req, res) => {
   }
 });
 
+//system health check
+app.get("/api/health", (req, res) => {
+  exec("/root/monitoring/system_monitoring.sh 2>/dev/null", (error, stdout) => {
+      if (error) {
+          return res.status(500).json({ error: "Error executing script" });
+      }
+      try {
+          res.json(JSON.parse(stdout.trim()));
+      } catch (err) {
+          res.status(500).json({ error: "Invalid JSON output", details: stdout.trim() });
+      }
+  });
+});
+
+
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
