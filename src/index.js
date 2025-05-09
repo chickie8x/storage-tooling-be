@@ -7,8 +7,8 @@ import { generateToken, verifyToken, authMiddleware } from './utils/index.js';
 
 
 const app = express();
-app.use(express.json());  
-app.use(express.urlencoded())
+app.use(express.json({limit: '5mb'}));  
+app.use(express.urlencoded({limit: '5mb', extended: true}))
 app.use(cors());
 
 
