@@ -7,9 +7,83 @@ import { generateToken, verifyToken, authMiddleware } from './utils/index.js';
 
 
 const app = express();
+app.use(cors());
+
+//create sessionTransport and transportCodes
+app.post('/api/session-transport/create', authMiddleware,
+
+  express.text({ type: "application/json", limit: "2mb" }),
+  (req, res, next) => {
+    const raw = req.body ?? "";
+
+    // 1) replace escaped \0 (backslash + 0) with valid unicode escape \\u0000
+    // 2) remove any actual null characters (0x00) if present
+    const sanitized = raw.replace(/\\0/g, "").replace(/\x00/g, "");
+    try {
+      req.body = JSON.parse(sanitized); // now safe to parse
+      next();
+    } catch (err) {
+      console.error("Failed to parse JSON after sanitization:", err);
+      return res.status(400).json({ error: "Invalid JSON payload" });
+    }
+  },
+  
+  async (req, res) => {
+  try {
+    // Extract and verify token
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = verifyToken(token);
+
+    // Fetch user
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    const { sessionCode, note, transportCode, transportCodeQuantity, transporter, goodsStatus, sessionType } = req.body;
+
+    // Validate required fields
+    if (!sessionCode || !transportCode) {
+      return res.status(400).json({ error: 'Session code and transport codes are required' });
+    }
+    
+    const sessionTransport = await prisma.sessionTransport.create({
+      data: {
+        sessionCode,
+        sessionType,
+        transportCodeQuantity,
+        transporter,
+        goodsStatus,
+        note,
+        transportCode: {
+          create: transportCode.map((code) => ({
+            code: code.code,
+            transporter: transporter,
+            goodsStatus: goodsStatus,
+            note: note,
+            author: user.name,
+            userId: user.id,
+          })),
+        },
+        author: user.name,
+        user: { connect: { id: user.id } },
+      },
+    });
+
+    return res.json(sessionTransport);
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ error: 'An error occurred while creating the session transport' });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 app.use(express.json({limit: '5mb'}));  
 app.use(express.urlencoded({limit: '5mb', extended: true}))
-app.use(cors());
 
 
 //create user
@@ -209,8 +283,6 @@ app.get("/api/health", (req, res) => {
       }
   });
 });
-
-
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
