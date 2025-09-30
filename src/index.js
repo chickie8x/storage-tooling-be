@@ -18,7 +18,8 @@ app.post('/api/session-transport/create', authMiddleware,
 
     // 1) replace escaped \0 (backslash + 0) with valid unicode escape \\u0000
     // 2) remove any actual null characters (0x00) if present
-    const sanitized = raw.replace(/\\0/g, "").replace(/\x00/g, "");
+    const sanitized = raw.replace(/\x00/g,"").replace(/\\/g,"");
+    console.log(sanitized); 
     try {
       req.body = JSON.parse(sanitized); // now safe to parse
       next();
